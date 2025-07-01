@@ -1,0 +1,435 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+
+}
+
+h1 {
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+}
+
+
+/* Reset some default styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Header styling */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 32px;
+    /* background-color: #f8f8f8; */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo styling */
+.logo {
+    /* font-size: 1rem; */
+    font-weight: bold;
+    color: white;
+    display: flex;
+    gap: 10px;
+}
+
+.logo img {
+    width: 40px;
+}
+
+.logo h1 {
+    color: white;
+    font-size: 1.5rem;
+    align-self: center;
+}
+
+/* Nav container */
+.nav {
+    display: flex;
+    gap: 46px;
+    align-items: center;
+}
+
+/* Text link */
+.nav-text {
+    text-decoration: none;
+    color: #333;
+    font-size: .8rem;
+    transition: color 0.3s;
+    color: white;
+    font-weight: 600;
+}
+
+.nav-text:hover {
+    color: #007bff;
+}
+
+.container {
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Button link */
+.nav-button {
+    text-decoration: none;
+    background-color: white;
+    color: black;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-size: .8rem;
+    transition: background-color 0.3s;
+}
+
+.nav-button:hover {
+    background-color: #0056b3;
+}
+
+.nav-toggle {
+    display: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: white;
+}
+
+.home {
+    background: black;
+    width: 100%;
+    height: 100vh;
+
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 10px 25px;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.bottom-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+    margin: 0;
+    padding: 0;
+}
+
+.bottom-nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: .8rem;
+}
+
+.bottom-nav a:hover {
+    color: #007BFF;
+}
+
+/* .hero-text {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-text h1 {
+    font-size: 5rem;
+    font-weight: 600;
+    color: white;
+    max-width: 90%;
+    line-height: 1.2;
+}
+
+.underline {
+    text-decoration: underline;
+    text-decoration-color: white;
+}
+
+
+.wavy {
+    text-decoration: underline wavy;
+    text-decoration-color: white;
+    text-underline-offset: 4px;
+} */
+
+/* Ensure hero section looks good */
+
+
+/* .hero-text {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-text h1 {
+    font-size: 5rem;
+    font-weight: 600;
+    color: white;
+    max-width: 90%;
+    line-height: 1.2;
+}
+
+/* Underline "Unlock" with solid white */
+
+
+/* .hero-text {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-text h1 {
+    font-size: 5rem;
+    font-weight: 600;
+    color: white;
+    max-width: 90%;
+    line-height: 1.2;
+}
+
+.underline {
+    text-decoration: underline;
+    text-decoration-color: white;
+}
+
+.wavy {
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: purple;
+    text-underline-offset: 6px;
+} */
+
+.hero-text {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-text h1 {
+    font-size: 5rem;
+    font-weight: 500;
+    color: white;
+    max-width: 90%;
+    line-height: 1.2;
+}
+
+/* Solid underline */
+.underline {
+    text-decoration: underline;
+    text-decoration-color: white;
+    text-decoration-thickness: 2px;
+    /* reduced line weight */
+    text-underline-offset: 9px;
+    /* adds space between text and line */
+}
+
+/* Wavy underline */
+.wavy {
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: purple;
+    text-decoration-thickness: 2px;
+    /* reduce wavy line thickness */
+    text-underline-offset: 9px;
+    /* adds space from text */
+}
+
+
+/* Make videos responsive and spaced */
+.top-video video,
+.bottom-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+
+/* .bottom-video {
+    width: 200px;
+    height: 200px;
+} */
+
+.video-wrapper {
+    position: absolute;
+    left: 30%;
+    top: 15%;
+    transform: translate(-15%, -30%);
+    z-index: 1;
+    overflow: hidden;
+    padding-top: 20px;
+}
+
+.video-wrapper1 {
+    position: absolute;
+    left: 70%;
+    bottom: 10%;
+    transform: translate(-10%, -70%);
+    z-index: 1;
+    overflow: hidden;
+
+}
+
+
+.video-wrapper-h2 h2 {
+    color: black;
+    font-size: .7rem;
+}
+
+.video-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.video-comment h2 {
+    color: black;
+    font-size: .6rem;
+}
+
+.video-comment {
+
+    background: #fff;
+    color: #333;
+    padding: 10px 16px;
+    border-radius: 0px 4px 4px 10px;
+    /* border-radius: 12px; */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    border-left: 1px;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+
+
+
+
+.video-comment1 {
+    padding-top: 5px;
+}
+
+/* Position top video slightly above hero text */
+.video-wrapper .top-video {
+
+    width: 130px;
+    height: 100px;
+    border: 1px solid white;
+    border-radius: 17px;
+    animation: slideBackForth 3s ease-in-out infinite alternate;
+}
+
+@keyframes slideBackForth {
+    0% {
+        transform: translateX(0);
+        /* shift left a bit */
+    }
+
+    100% {
+        transform: translateX(15px);
+        /* shift right a bit */
+    }
+}
+
+
+/* @keyframes slideBackForth {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(50vw - 300px));
+    }
+} */
+
+.video-wrapper-h2 {
+    background: white;
+    /* padding-top: 5px; */
+}
+
+/* Position bottom video below the hero text */
+.video-wrapper1 .bottom-video {
+    bottom: 0;
+    width: 100px;
+    height: 90px;
+
+    border: 1px solid white;
+    border-radius: 17px;
+}
+
+/* Ensure hero text appears above the videos */
+.hero-text {
+    position: relative;
+    z-index: 2;
+}
+
+
+
+/* Optional: add spacing */
+/* .top-video {
+    margin-bottom: 2rem;
+}
+
+.bottom-video {
+    margin-top: 2rem;
+} */
+
+
+
+
+
+@media (max-width: 768px) {
+    .nav {
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background: #222;
+        flex-direction: column;
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        z-index: 2;
+    }
+
+    .nav.open {
+        max-height: 200px;
+        /* enough height to show links */
+    }
+
+    .nav-text,
+    .nav-button {
+        padding: 15px;
+        border-radius: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+}

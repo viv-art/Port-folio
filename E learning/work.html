@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eduwerks Full Shapes Display</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 20);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // Materials
+        const pinkMat = new THREE.MeshStandardMaterial({ color: 0xff5ca4, metalness: 0.5, roughness: 0.3 });
+        const greenMat = new THREE.MeshStandardMaterial({ color: 0x4cff9b, metalness: 0.5, roughness: 0.3 });
+        const purpleMat = new THREE.MeshStandardMaterial({ color: 0x885cff, metalness: 0.7, roughness: 0.3 });
+        const orangeMat = new THREE.MeshStandardMaterial({ color: 0xffa500, metalness: 0.5, roughness: 0.3 });
+        const clearMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+        // const bubbleMat = new THREE.MeshPhysicalMaterial({
+        //     color: 0xffffff,
+        //     metalness: 0,
+        //     roughness: 0.1,
+        //     transmission: 0.9,
+        //     thickness: 0.5,
+        //     clearcoat: 1,
+        //     clearcoatRoughness: 0.1,
+        //     reflectivity: 0.5,
+        //     ior: 1.3,
+        //     emissive: 0x88ccff,
+        //     emissiveIntensity: 0.2,
+        //     transparent: true,
+        //     opacity: 0.6
+        // });
+
+        const bubbleMat = new THREE.MeshPhysicalMaterial({
+            color: 0x1e90ff,       // DodgerBlue — rich, vibrant blue
+            transparent: true,
+            opacity: 0.3,          // Adjust for visibility vs transparency
+            roughness: 0,
+            metalness: 0,
+            transmission: 1,       // Full light transmission (glass effect)
+            thickness: 0.5,
+            ior: 1.33,             // Index of refraction for water
+            reflectivity: 0.5,
+            envMapIntensity: 1
+        });
+
+
+
+        const kitePurpleMat = new THREE.MeshStandardMaterial({
+            color: 0x800080,
+            metalness: 0.5,
+            roughness: 0.3,
+            emissive: 0x550055,
+            emissiveIntensity: 0.6,
+        });
+
+        const kiteOrangeMat = new THREE.MeshStandardMaterial({
+            color: 0xff9900,
+            metalness: 0.5,
+            roughness: 0.3,
+            emissive: 0xff6600,
+            emissiveIntensity: 0.5,
+        });
+
+        const kiteClearMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.3,
+            metalness: 0.1,
+            roughness: 0.1,
+            emissive: 0x88ccff,
+            emissiveIntensity: 0.4,
+        });
+
+        // Star Shape Function
+        function createStarShape(radiusOuter = 1, radiusInner = 0.5, points = 5) {
+            const shape = new THREE.Shape();
+            const step = Math.PI / points;
+            for (let i = 0; i < 2 * points; i++) {
+                const r = i % 2 === 0 ? radiusOuter : radiusInner;
+                const angle = i * step - Math.PI / 2;
+                const x = Math.cos(angle) * r;
+                const y = Math.sin(angle) * r;
+                if (i === 0) shape.moveTo(x, y);
+                else shape.lineTo(x, y);
+            }
+            shape.closePath();
+            return shape;
+        }
+
+        // Multiplication Sign Function
+        function createRoundedBarShape(length = 2.4, width = 0.4, radius = 0.06) {
+            const shape = new THREE.Shape();
+            const halfL = length / 2;
+            const halfW = width / 2;
+
+            shape.absarc(-halfL + radius, -halfW + radius, radius, Math.PI, Math.PI * 1.5);
+            shape.lineTo(halfL - radius, -halfW);
+            shape.absarc(halfL - radius, -halfW + radius, radius, Math.PI * 1.5, 0);
+            shape.lineTo(halfL, halfW - radius);
+            shape.absarc(halfL - radius, halfW - radius, radius, 0, Math.PI * 0.5);
+            shape.lineTo(-halfL + radius, halfW);
+            shape.absarc(-halfL + radius, halfW - radius, radius, Math.PI * 0.5, Math.PI);
+            shape.lineTo(-halfL, -halfW + radius);
+
+            return shape;
+        }
+
+        const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 3 };
+        const barShape = createRoundedBarShape();
+        const barGeo = new THREE.ExtrudeGeometry(barShape, extrudeSettings);
+
+        // Function to create Multiplication Group
+        function createMultiplication(material) {
+            const group = new THREE.Group();
+
+            const bar1 = new THREE.Mesh(barGeo, material);
+            bar1.rotation.z = Math.PI / 4;
+            group.add(bar1);
+
+            const bar2 = new THREE.Mesh(barGeo, material);
+            bar2.rotation.z = -Math.PI / 4;
+            group.add(bar2);
+
+            const midBar = new THREE.Mesh(barGeo, material);
+            midBar.rotation.y = Math.PI / 2;
+            midBar.position.x = - (0.7 / 2) + 0.2;
+            midBar.position.z = 0.15;
+            group.add(midBar);
+
+            return group;
+        }
+
+        // Function to create Kite
+        function createKite(frontMat, sideMat, positionX) {
+            const kiteShape = new THREE.Shape();
+            const r = 0.25, s = 1.2;
+
+            kiteShape.moveTo(0, s - r);
+            kiteShape.quadraticCurveTo(0, s, r, s - r);
+            kiteShape.lineTo(s - r, r);
+            kiteShape.quadraticCurveTo(s, 0, s - r, -r);
+            kiteShape.lineTo(r, -s + r);
+            kiteShape.quadraticCurveTo(0, -s, -r, -s + r);
+            kiteShape.lineTo(-s + r, -r);
+            kiteShape.quadraticCurveTo(-s, 0, -s + r, r);
+            kiteShape.lineTo(-r, s - r);
+            kiteShape.quadraticCurveTo(0, s, 0, s - r);
+
+            const hole = new THREE.Path();
+            hole.absarc(0, 0, 0.5, 0, Math.PI * 2, true);
+            kiteShape.holes.push(hole);
+
+            const kiteGeo = new THREE.ExtrudeGeometry(kiteShape, {
+                depth: 0.25,
+                bevelEnabled: true,
+                bevelThickness: 0.02,
+                bevelSize: 0.02,
+                bevelSegments: 4,
+            });
+            kiteGeo.center();
+
+            const kiteMesh = new THREE.Mesh(kiteGeo, [frontMat, sideMat]);
+            kiteMesh.position.set(positionX, -3, 0);
+
+            // Inner torus same as side color
+            const torusTunnelGeo = new THREE.TorusGeometry(0.5, 0.125, 32, 100);
+            const torusTunnelMesh = new THREE.Mesh(torusTunnelGeo, sideMat);
+            torusTunnelMesh.rotation.set(0, 0, Math.PI / 2);
+            kiteMesh.add(torusTunnelMesh);
+
+            scene.add(kiteMesh);
+        }
+
+
+        // Create All Shapes
+        const starGeo = new THREE.ExtrudeGeometry(createStarShape(), { depth: 0.3, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.1 });
+
+        const purpleStar = new THREE.Mesh(starGeo, purpleMat);
+        purpleStar.position.set(-8, 3, 0);
+        scene.add(purpleStar);
+
+        const bubbleStar = new THREE.Mesh(starGeo, clearMat);
+        bubbleStar.position.set(-6, 3, 0);
+        scene.add(bubbleStar);
+
+        const multiplyGreen = createMultiplication(greenMat);
+        multiplyGreen.position.set(-4, 3, 0);
+        scene.add(multiplyGreen);
+
+        const multiplyOrange = createMultiplication(orangeMat);
+        multiplyOrange.position.set(-2, 3, 0);
+        scene.add(multiplyOrange);
+
+        const hexShape = new THREE.Shape();
+        const hexRadius = 1;
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+            const x = Math.cos(angle) * hexRadius;
+            const y = Math.sin(angle) * hexRadius;
+            if (i === 0) hexShape.moveTo(x, y);
+            else hexShape.lineTo(x, y);
+        }
+        hexShape.closePath();
+        const hexGeo = new THREE.ExtrudeGeometry(hexShape, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.1 });
+        const hexMesh = new THREE.Mesh(hexGeo, greenMat);
+        hexMesh.position.set(0, 3, 0);
+        scene.add(hexMesh);
+
+        const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
+
+        const ballPurple = new THREE.Mesh(sphereGeo, purpleMat);
+        ballPurple.position.set(2.5, 3, 0);
+        scene.add(ballPurple);
+
+        const ballGreen = new THREE.Mesh(sphereGeo, greenMat);
+        ballGreen.position.set(4.5, 3, 0);
+        scene.add(ballGreen);
+
+        const ballClear1 = new THREE.Mesh(sphereGeo, clearMat);
+        ballClear1.position.set(6.5, 3, 0);
+        scene.add(ballClear1);
+
+        const ballClear2 = new THREE.Mesh(sphereGeo, clearMat);
+        ballClear2.position.set(8.5, 3, 0);
+        scene.add(ballClear2);
+
+        const torusGeo = new THREE.TorusGeometry(1, 0.3, 64, 100);
+
+        const torusGreen1 = new THREE.Mesh(torusGeo, greenMat);
+        torusGreen1.position.set(-8, 0, 0);
+        scene.add(torusGreen1);
+
+        const torusGreen2 = new THREE.Mesh(torusGeo, greenMat);
+        torusGreen2.position.set(-6, 0, 0);
+        scene.add(torusGreen2);
+
+        const torusBubble = new THREE.Mesh(torusGeo, clearMat);
+        torusBubble.position.set(-4, 0, 0);
+        scene.add(torusBubble);
+
+        createKite(kitePurpleMat, kitePurpleMat, -3);  // Purple kite
+        createKite(kiteOrangeMat, kiteOrangeMat, 0);   // Orange kite
+        createKite(kiteClearMat, kiteClearMat, 3);     // Clear bubble kite
+
+
+        // Animate
+        function animate() {
+            requestAnimationFrame(animate);
+
+            purpleStar.rotation.y += 0.01;
+            bubbleStar.rotation.y += 0.01;
+
+            multiplyGreen.rotation.y += 0.008;
+            multiplyOrange.rotation.y += 0.008;
+
+            hexMesh.rotation.y -= 0.01;
+
+            ballPurple.rotation.y += 0.008;
+            ballGreen.rotation.y += 0.008;
+            ballClear1.rotation.y += 0.008;
+            ballClear2.rotation.y += 0.008;
+
+            torusGreen1.rotation.x += 0.006;
+            torusGreen2.rotation.x += 0.006;
+            torusBubble.rotation.x += 0.006;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eduwerks Shapes + Kite + Multiplication Sign</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+
+        const camera = new THREE.PerspectiveCamera(
+            60,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            100
+        );
+        camera.position.set(0, 0, 12);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // Materials
+        const pinkMat = new THREE.MeshStandardMaterial({
+            color: 0xff5ca4,
+            metalness: 0.5,
+            roughness: 0.3,
+        });
+        const greenMat = new THREE.MeshStandardMaterial({
+            color: 0x4cff9b,
+            metalness: 0.5,
+            roughness: 0.3,
+        });
+        const purpleMat = new THREE.MeshStandardMaterial({
+            color: 0x885cff,
+            metalness: 0.7,
+            roughness: 0.3,
+        });
+        const blueMat = new THREE.MeshStandardMaterial({
+            color: 0x5ca4ff,
+            metalness: 0.6,
+            roughness: 0.25,
+            emissive: 0x2a5ca4,
+            emissiveIntensity: 0.5,
+        });
+        const kitePinkMat = new THREE.MeshStandardMaterial({
+            color: 0xff66cc,
+            metalness: 0.5,
+            roughness: 0.2,
+            emissive: 0xff66cc,
+            emissiveIntensity: 0.8,
+        });
+        const kitePurpleMat = new THREE.MeshStandardMaterial({
+            color: 0x800080,
+            metalness: 0.5,
+            roughness: 0.3,
+            emissive: 0x550055,
+            emissiveIntensity: 0.6,
+        });
+
+        // 1. Star Shape
+        function createStarShape(radiusOuter = 1, radiusInner = 0.5, points = 5) {
+            const shape = new THREE.Shape();
+            const step = Math.PI / points;
+            for (let i = 0; i < 2 * points; i++) {
+                const r = i % 2 === 0 ? radiusOuter : radiusInner;
+                const angle = i * step - Math.PI / 2;
+                const x = Math.cos(angle) * r;
+                const y = Math.sin(angle) * r;
+                if (i === 0) shape.moveTo(x, y);
+                else shape.lineTo(x, y);
+            }
+            shape.closePath();
+            return shape;
+        }
+        const starShape = createStarShape(1, 0.5, 5);
+        const starGeo = new THREE.ExtrudeGeometry(starShape, {
+            depth: 0.3,
+            bevelEnabled: true,
+            bevelThickness: 0.1,
+            bevelSize: 0.1,
+        });
+        const starMesh = new THREE.Mesh(starGeo, pinkMat);
+        starMesh.position.set(-5, 0, 0);
+        scene.add(starMesh);
+
+        // 2. Multiplication Sign (rounded bars)
+
+        function createRoundedBarShape(length = 2.4, width = 0.4, radius = 0.06) {
+            const shape = new THREE.Shape();
+            const halfL = length / 2;
+            const halfW = width / 2;
+
+            shape.absarc(-halfL + radius, -halfW + radius, radius, Math.PI, Math.PI * 1.5);
+            shape.lineTo(halfL - radius, -halfW);
+            shape.absarc(halfL - radius, -halfW + radius, radius, Math.PI * 1.5, 0);
+            shape.lineTo(halfL, halfW - radius);
+            shape.absarc(halfL - radius, halfW - radius, radius, 0, Math.PI * 0.5);
+            shape.lineTo(-halfL + radius, halfW);
+            shape.absarc(-halfL + radius, halfW - radius, radius, Math.PI * 0.5, Math.PI);
+            shape.lineTo(-halfL, -halfW + radius);
+
+            return shape;
+        }
+
+        const extrudeSettings = {
+            depth: 0.3,
+            bevelEnabled: true,
+            bevelThickness: 0.04,
+            bevelSize: 0.04,
+            bevelSegments: 3,
+        };
+
+        const barShape = createRoundedBarShape();
+        const barGeo = new THREE.ExtrudeGeometry(barShape, extrudeSettings);
+
+        const multiplyGroup = new THREE.Group();
+
+        // Diagonal bar 1
+        const bar1 = new THREE.Mesh(barGeo, blueMat);
+        bar1.rotation.z = Math.PI / 4;
+        multiplyGroup.add(bar1);
+
+        // Diagonal bar 2
+        const bar2 = new THREE.Mesh(barGeo, blueMat);
+        bar2.rotation.z = -Math.PI / 4;
+        multiplyGroup.add(bar2);
+
+        // Middle horizontal bar (protruding forward)
+        const barLength = 0.7;
+        const midBar = new THREE.Mesh(barGeo, blueMat);
+        midBar.rotation.y = Math.PI / 2;
+        // position it so its center aligns with the multiplication sign's center
+        midBar.position.x = - (barLength / 2) + 0.2; // tweak this if needed
+        midBar.position.z = 0.15;
+        midBar.position.y = 0;
+        multiplyGroup.add(midBar);
+
+        multiplyGroup.position.set(-2, 0, 0);
+        scene.add(multiplyGroup);
+
+        // 3. Hexagon Shape
+        const hexShape = new THREE.Shape();
+        const hexRadius = 1;
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+            const x = Math.cos(angle) * hexRadius;
+            const y = Math.sin(angle) * hexRadius;
+            if (i === 0) hexShape.moveTo(x, y);
+            else hexShape.lineTo(x, y);
+        }
+        hexShape.closePath();
+        const hexGeo = new THREE.ExtrudeGeometry(hexShape, {
+            depth: 0.3,
+            bevelEnabled: true,
+            bevelThickness: 0.1,
+            bevelSize: 0.1,
+        });
+        const hexMesh = new THREE.Mesh(hexGeo, greenMat);
+        hexMesh.position.set(3, 0, 0);
+        scene.add(hexMesh);
+
+        // 4. Circle (sphere)
+        const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
+        const sphereMesh = new THREE.Mesh(sphereGeo, purpleMat);
+        sphereMesh.position.set(5.5, 0, 0);
+        scene.add(sphereMesh);
+
+        // 5. Torus (donut)
+        const torusGeo = new THREE.TorusGeometry(1, 0.3, 64, 100);
+        const torusMesh = new THREE.Mesh(torusGeo, pinkMat);
+        torusMesh.position.set(8, 0, 0);
+        scene.add(torusMesh);
+
+        // ----- Kite shape with hole and purple hole sides -----
+
+        // Main kite shape with rounded corners
+        const kiteShape = new THREE.Shape();
+        const r = 0.25; // corner radius
+        const s = 1.2; // distance from center to point
+
+        kiteShape.moveTo(0, s - r);
+        kiteShape.quadraticCurveTo(0, s, r, s - r);
+        kiteShape.lineTo(s - r, r);
+        kiteShape.quadraticCurveTo(s, 0, s - r, -r);
+        kiteShape.lineTo(r, -s + r);
+        kiteShape.quadraticCurveTo(0, -s, -r, -s + r);
+        kiteShape.lineTo(-s + r, -r);
+        kiteShape.quadraticCurveTo(-s, 0, -s + r, r);
+        kiteShape.lineTo(-r, s - r);
+        kiteShape.quadraticCurveTo(0, s, 0, s - r);
+
+        // Add circular hole in the middle
+        const hole = new THREE.Path();
+        hole.absarc(0, 0, 0.5, 0, Math.PI * 2, true);
+        kiteShape.holes.push(hole);
+
+        // Extrude settings for kite
+        const kiteExtrudeSettings = {
+            depth: 0.25,
+            bevelEnabled: true,
+            bevelThickness: 0.02,
+            bevelSize: 0.02,
+            bevelSegments: 4,
+        };
+
+        const kiteGeo = new THREE.ExtrudeGeometry(kiteShape, kiteExtrudeSettings);
+        kiteGeo.center();
+
+        const kiteMesh = new THREE.Mesh(kiteGeo, [kitePinkMat, kitePurpleMat]);
+        kiteMesh.position.set(0, 0, 0);
+        scene.add(kiteMesh);
+
+        // Add purple torus inside the kite hole for smooth curved hole wall
+        const torusTunnelGeo = new THREE.TorusGeometry(0.5, kiteExtrudeSettings.depth / 2, 32, 100);
+        const torusTunnelMat = new THREE.MeshStandardMaterial({
+            color: 0x800080,
+            metalness: 0.6,
+            roughness: 0.2,
+            emissive: 0x550055,
+            emissiveIntensity: 0.7,
+        });
+        const torusTunnelMesh = new THREE.Mesh(torusTunnelGeo, torusTunnelMat);
+
+        // Rotate torus horizontally (hole axis left-right)
+        torusTunnelMesh.rotation.set(0, 0, Math.PI / 2);
+
+        // Position torus at kite center (relative)
+        torusTunnelMesh.position.set(0, 0, 0);
+
+        // Add torus as child of kite so it moves & rotates with it
+        kiteMesh.add(torusTunnelMesh);
+
+        // Animate
+        function animate() {
+            requestAnimationFrame(animate);
+
+            starMesh.rotation.y += 0.01;
+
+            multiplyGroup.rotation.y += 0.008;
+
+            hexMesh.rotation.y -= 0.01;
+
+            sphereMesh.rotation.y += 0.008;
+            sphereMesh.rotation.x += 0.004;
+
+            torusMesh.rotation.x += 0.006;
+            torusMesh.rotation.y += 0.008;
+
+            kiteMesh.rotation.x += 0.003;
+            kiteMesh.rotation.y += 0.004;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
